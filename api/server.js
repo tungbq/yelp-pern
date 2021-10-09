@@ -3,24 +3,26 @@ const morgan = require('morgan');
 const app = express();
 require('dotenv').config();
 const port = process.env.PORT || 2021;
+const db = require('./db');
 
 // Show HTTP logs
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 
 // Receive json body from client
-app.use(express.json())
+app.use(express.json());
 
 app.get('/', (req, res) => {
 	res.json('Hi there!');
 });
 
 // Get all restaurants
-app.get('/api/v1/restaurants', (req, res) => {
+app.get('/api/v1/restaurants', async (req, res) => {
+	const results = await db.query('SELECT * FROM restaurants');
+	console.log(results);
+
 	res.status(200).json({
 		status: 'success',
-		data: {
-			restaurants: ['1', '2', '3'],
-		},
+		data: results.rows,
 	});
 });
 
