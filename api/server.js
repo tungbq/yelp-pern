@@ -55,13 +55,16 @@ app.get('/api/v1/restaurants/:id', async (req, res) => {
 app.post('/api/v1/restaurants', async (req, res) => {
 	try {
 		const addedRestaurants = await db.query(
-			`INSERT INTO restaurants (name, location, price_range) VALUES ($1, $2, $3)`,
+			`INSERT INTO restaurants (name, location, price_range) VALUES ($1, $2, $3) returning *`,
 			[req.body.name, req.body.location, req.body.price_range]
 		);
 
-		console.log(addedRestaurants);
-		res.status(200).json(req.body);
-	} catch (error) {
+		res.status(200).json({
+			status: 'success',
+			data: {
+				restaurants: addedRestaurants.rows[0],
+			},
+		});	} catch (error) {
 		console.log(error);
 		res.status(500).json(error);
 	}
