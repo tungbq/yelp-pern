@@ -4,13 +4,15 @@ const db = require('../db');
 // Get all restaurants
 router.get('/', async (req, res) => {
 	try {
-		const results = await db.query('SELECT * FROM restaurants');
+		const restaurantRatingsData = await db.query(
+			'SELECT * FROM restaurants LEFT JOIN (SELECT restaurants_id, COUNT(*), TRUNC(AVG(rating), 1) AS avarage_rating FROM reviews GROUP BY restaurants_id) reviews ON restaurants.id = reviews.restaurants_id;'
+		);
 
 		res.status(200).json({
 			status: 'success',
-			result: results.rows.length,
+			result: restaurantRatingsData.rows.length,
 			data: {
-				restaurants: results.rows,
+				restaurants: restaurantRatingsData.rows,
 			},
 		});
 	} catch (error) {
@@ -22,14 +24,20 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
 	try {
 		// Parameterized query to avoid sql injection vulnerabilities
-		const result = await db.query(`SELECT * FROM restaurants WHERE id= $1`, [
+		const restaurant = await db.query(
+			`SELECT * FROM restaurants LEFT JOIN (SELECT restaurants_id, COUNT(*), TRUNC(AVG(rating), 1) AS avarage_rating FROM reviews GROUP BY restaurants_id) reviews ON restaurants.id = reviews.restaurants_id WHERE id = $1`,
+			[req.params.id]
+		);
+
+		const reviews = await db.query(`SELECT * FROM reviews WHERE restaurants_id= $1`, [
 			req.params.id,
 		]);
 
 		res.status(200).json({
 			status: 'success',
 			data: {
-				restaurants: result.rows[0],
+				restaurants: restaurant.rows[0],
+				reviews: reviews.rows,
 			},
 		});
 	} catch (error) {

@@ -59,3 +59,47 @@ INSERT INTO reviews (restaurants_id, name, review, rating) VALUES (1111, 'leo', 
 -- ERROR:  insert or update on table "reviews" violates foreign key constraint "reviews_restaurants_id_fkey"
 -- DETAIL:  Key (restaurants_id)=(1111) is not present in table "restaurants".
 
+
+select count(*) from reviews;
+yelp=# SELECT MAX(rating) FROM reviews;
+
+yelp=# SELECT AVG(rating) FROM reviews;
+
+yelp=# SELECT trunc(AVG(rating), 2) FROM reviews;
+
+-- Rename column
+yelp=# SELECT trunc(AVG(rating), 2) AS average_reviews  FROM reviews;
+
+yelp=# SELECT trunc(AVG(rating), 2) AS avg_rating FROM reviews WHERE restaurants_id = 10;
+
+
+
+yelp=# SELECT location, COUNT(location) FROM restaurants GROUP BY location;
+--     location    | count 
+-- ----------------+-------
+--  binh chanh     |     6
+--  test-updated-2 |     2
+
+
+ yelp=# SELECT restaurants_id, COUNT(restaurants_id) FROM reviews GROUP BY restaurants_id;
+
+ yelp=# SELECT restaurants_id, AVG(rating) FROM reviews GROUP BY restaurants_id;
+--  restaurants_id |          avg           
+-- ----------------+------------------------
+--              10 |     2.1250000000000000
+--              13 | 1.00000000000000000000
+-- (2 rows)
+
+yelp=# SELECT * FROM restaurants INNER JOIN reviews ON restaurants.id = reviews.restaurants_id;
+--  id |  name  |  location  | price_range | id | restaurants_id |   name    |                     review                      | rating 
+-- ----+--------+------------+-------------+----+----------------+-----------+-------------------------------------------------+--------
+--  10 | test-7 | binh chanh |           4 |  2 |             10 | leo       | Bad restaurants                                 |      1
+--  10 | test-7 | binh chanh |           4 |  3 |             10 | reus      | Bad restaurants 1                               |      1
+
+yelp=# SELECT * FROM restaurants LEFT JOIN reviews ON restaurants.id = reviews.restaurants_id;
+
+yelp=# SELECT * FROM restaurants LEFT JOIN (SELECT restaurants_id, COUNT(*), TRUNC(AVG(rating), 1) AS avarage_rating FROM reviews GROUP BY restaurants_id) reviews ON restaurants.id = reviews.restaurants_id;
+
+--  id |     name     |    location    | price_range | restaurants_id | count | avarage_rating 
+-- ----+--------------+----------------+-------------+----------------+-------+----------------
+--  10 | test-7       | binh chanh     |           4 |             10 |     8 |            2.1
