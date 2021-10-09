@@ -35,6 +35,7 @@ app.get('/api/v1/restaurants', async (req, res) => {
 // Get restaurant by ID
 app.get('/api/v1/restaurants/:id', async (req, res) => {
 	try {
+    // Parameterized query to avoid sql injection vulnerabilities
 		const result = await db.query(`SELECT * FROM restaurants WHERE id= $1`, [
 			req.params.id,
 		]);
