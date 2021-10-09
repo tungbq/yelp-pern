@@ -35,7 +35,7 @@ app.get('/api/v1/restaurants', async (req, res) => {
 // Get restaurant by ID
 app.get('/api/v1/restaurants/:id', async (req, res) => {
 	try {
-    // Parameterized query to avoid sql injection vulnerabilities
+		// Parameterized query to avoid sql injection vulnerabilities
 		const result = await db.query(`SELECT * FROM restaurants WHERE id= $1`, [
 			req.params.id,
 		]);
@@ -52,8 +52,19 @@ app.get('/api/v1/restaurants/:id', async (req, res) => {
 });
 
 // Create restaurant
-app.post('/api/v1/restaurants', (req, res) => {
-	res.status(200).json(req.body);
+app.post('/api/v1/restaurants', async (req, res) => {
+	try {
+		const addedRestaurants = await db.query(
+			`INSERT INTO restaurants (name, location, price_range) VALUES ($1, $2, $3)`,
+			[req.body.name, req.body.location, req.body.price_range]
+		);
+
+		console.log(addedRestaurants);
+		res.status(200).json(req.body);
+	} catch (error) {
+		console.log(error);
+		res.status(500).json(error);
+	}
 });
 
 // Update restaurant
