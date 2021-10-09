@@ -44,3 +44,18 @@ CREATE TABLE restaurants (
   location VARCHAR(50) NOT NULL,
   price_range INT NOT NULL check(price_range >=1 and price_range <=5)
 );
+
+
+CREATE TABLE reviews (
+  id BIGSERIAL NOT NULL PRIMARY KEY,
+  restaurants_id BIGSERIAL NOT NULL REFERENCES restaurants(id),
+  name VARCHAR(50) NOT NULL,
+  review TEXT NOT NULL,
+  rating INT NOT NULL check(rating >=1 and rating <=5)
+);
+
+-- yelp=# 
+INSERT INTO reviews (restaurants_id, name, review, rating) VALUES (1111, 'leo', 'Bad restaurant', 1);
+-- ERROR:  insert or update on table "reviews" violates foreign key constraint "reviews_restaurants_id_fkey"
+-- DETAIL:  Key (restaurants_id)=(1111) is not present in table "restaurants".
+
