@@ -1,4 +1,4 @@
-const router = require('express').Router()
+const router = require('express').Router();
 const db = require('../db');
 
 // Get all restaurants
@@ -97,4 +97,23 @@ router.delete('/:id', async (req, res) => {
 	}
 });
 
-module.exports = router
+// Add review
+router.post('/:id/addreview', async (req, res) => {
+	try {
+		const addedReviews = await db.query(
+			`INSERT INTO reviews (restaurants_id, name, review, rating) VALUES ($1, $2, $3, $4) returning *`,
+			[req.params.id, req.body.name, req.body.review, req.body.rating]
+		);
+
+		res.status(200).json({
+			status: 'success',
+			data: {
+				restaurant: addedReviews.rows[0],
+			},
+		});
+	} catch (error) {
+		res.status(500).json(error);
+	}
+});
+
+module.exports = router;
