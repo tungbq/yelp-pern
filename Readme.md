@@ -1,3 +1,6 @@
+# Get started:
+## Create '.env' file on your local machine, and refer to '.env.sample' file to update acordingly value
+
 # Start container
 `docker compose up -d`
 
