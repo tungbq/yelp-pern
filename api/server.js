@@ -17,23 +17,37 @@ app.get('/', (req, res) => {
 
 // Get all restaurants
 app.get('/api/v1/restaurants', async (req, res) => {
-	const results = await db.query('SELECT * FROM restaurants');
-	console.log(results);
+	try {
+		const results = await db.query('SELECT * FROM restaurants');
 
-	res.status(200).json({
-		status: 'success',
-		data: results.rows,
-	});
+		res.status(200).json({
+			status: 'success',
+			result: results.rows.length,
+			data: {
+				restaurants: results.rows,
+			},
+		});
+	} catch (error) {
+		res.status(500).json(error);
+	}
 });
 
 // Get restaurant by ID
-app.get('/api/v1/restaurants/:id', (req, res) => {
-	res.status(200).json({
-		status: 'success',
-		data: {
-			restaurants: ['1'],
-		},
-	});
+app.get('/api/v1/restaurants/:id', async (req, res) => {
+	try {
+		const result = await db.query(`SELECT * FROM restaurants WHERE id= $1`, [
+			req.params.id,
+		]);
+
+		res.status(200).json({
+			status: 'success',
+			data: {
+				restaurants: result.rows[0],
+			},
+		});
+	} catch (error) {
+		res.status(500).json(error);
+	}
 });
 
 // Create restaurant
