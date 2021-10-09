@@ -3,7 +3,8 @@ const morgan = require('morgan');
 const app = express();
 require('dotenv').config();
 const port = process.env.PORT || 2021;
-const db = require('./db');
+
+const restaurantsRoute = require('./routes/restaurants.js');
 
 // Show HTTP logs
 app.use(morgan('dev'));
@@ -15,101 +16,7 @@ app.get('/', (req, res) => {
 	res.json('Hi there!');
 });
 
-// Get all restaurants
-app.get('/api/v1/restaurants', async (req, res) => {
-	try {
-		const results = await db.query('SELECT * FROM restaurants');
-
-		res.status(200).json({
-			status: 'success',
-			result: results.rows.length,
-			data: {
-				restaurants: results.rows,
-			},
-		});
-	} catch (error) {
-		res.status(500).json(error);
-	}
-});
-
-// Get restaurant by ID
-app.get('/api/v1/restaurants/:id', async (req, res) => {
-	try {
-		// Parameterized query to avoid sql injection vulnerabilities
-		const result = await db.query(`SELECT * FROM restaurants WHERE id= $1`, [
-			req.params.id,
-		]);
-
-		res.status(200).json({
-			status: 'success',
-			data: {
-				restaurants: result.rows[0],
-			},
-		});
-	} catch (error) {
-		res.status(500).json(error);
-	}
-});
-
-// Create restaurant
-app.post('/api/v1/restaurants', async (req, res) => {
-	try {
-		const addedRestaurants = await db.query(
-			`INSERT INTO restaurants (name, location, price_range) VALUES ($1, $2, $3) returning *`,
-			[req.body.name, req.body.location, req.body.price_range]
-		);
-
-		res.status(200).json({
-			status: 'success',
-			data: {
-				restaurants: addedRestaurants.rows[0],
-			},
-		});
-	} catch (error) {
-		console.log(error);
-		res.status(500).json(error);
-	}
-});
-
-// Update restaurant
-app.put('/api/v1/restaurants/:id', async (req, res) => {
-	// Sample cmd: UPDATE restaurants SET name = 'test-updated', location = 'test-updated-2', price_range = 2 WHERE id = 8;
-	try {
-		const updatedRestaurant = await db.query(
-			`UPDATE restaurants SET name = $1, location = $2, price_range = $3 where id = $4 returning *`,
-			[req.body.name, req.body.location, req.body.price_range, req.params.id]
-		);
-
-		res.status(200).json({
-			status: 'success',
-			data: {
-				restaurants: updatedRestaurant.rows[0],
-			},
-		});
-	} catch (error) {
-		console.log(error);
-		res.status(500).json(error);
-	}
-});
-
-// Delete restaurant
-app.delete('/api/v1/restaurants/:id', async (req, res) => {
-	try {
-		const deletedRestaurants = await db.query(
-			`DELETE FROM restaurants WHERE id = $1 returning *`,
-			[req.params.id]
-		);
-
-		res.status(200).json({
-			status: 'success',
-			data: {
-				restaurant: deletedRestaurants.rows[0],
-			},
-		});
-	} catch (error) {
-		res.status(500).json(error);
-	}
-});
+app.use('/api/v1/restaurants', restaurantsRoute);
 
 app.listen(port, () => {
 	console.log(`Server is up and running on port ${port}`);
