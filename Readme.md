@@ -1,5 +1,6 @@
 # Start container
 `docker compose up -d`
 
-# Go to psql
+# To play around with Posgres
+`docker exec -it postgres_container bash`
 `psql -U postgres`
